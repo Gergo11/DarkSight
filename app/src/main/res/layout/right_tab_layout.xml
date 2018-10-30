@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.AppCompatImageView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="false"
+        android:scaleType="fitXY"
+        android:src="@drawable/bg_right_tab"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="99dp"
+        />
+
+    <TextView
+        android:id="@+id/txtadvancedEnc"
+        android:layout_width="120dp"
+        android:layout_height="30dp"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="30dp"
+        tools:layout_editor_absoluteY="110dp"
+         />
+
+    <Switch
+        android:id="@+id/swAdvancedEnc"
+        android:layout_width="120dp"
+        android:layout_height="30dp"
+        android:text="Switch"
+        tools:layout_editor_absoluteX="230dp"
+        tools:layout_editor_absoluteY="110dp"
+        />
+
+    <TextView
+        android:id="@+id/txtSound"
+        android:layout_width="120dp"
+        android:layout_height="30dp"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="30dp"
+        tools:layout_editor_absoluteY="150dp"
+         />
+
+    <Switch
+        android:id="@+id/swSound"
+        android:layout_width="120dp"
+        android:layout_height="30dp"
+        android:text="Switch"
+        tools:layout_editor_absoluteX="230dp"
+        tools:layout_editor_absoluteY="150dp"
+         />
+
+    <TextView
+        android:id="@+id/txtNotifications"
+        android:layout_width="120dp"
+        android:layout_height="30dp"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="30dp"
+        tools:layout_editor_absoluteY="190dp"
+         />
+
+    <Switch
+        android:id="@+id/swNotifications"
+        android:layout_width="120dp"
+        android:layout_height="30dp"
+        android:text="Switch"
+        tools:layout_editor_absoluteX="230dp"
+        tools:layout_editor_absoluteY="190dp"
+         />
+
+
+
+</android.support.constraint.ConstraintLayout>
