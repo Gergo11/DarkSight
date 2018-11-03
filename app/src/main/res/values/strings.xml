@@ -1,5 +1,14 @@
 <resources>
     <string name="app_name">DarkSight</string>
     <string name="action_settings">Settings</string>
-    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="txtInputTitle">Enter the remote IP address below.</string>
+    <string name="txtInpIP">Enter remote IP here!</string>
+    <string name="btnconnect">Connect</string>
+    <string name="txtIPTitle">Your Own IP:</string>
+    <string name="txtIp">IP is not avaible!</string>
+    <string name="txtInMessage">Type your message here.</string>
+    <string name="btnSend">Send!</string>
+    <string name="txtadvancedEnc">Advanced Encryption:</string>
+    <string name="txtSound">Sound:</string>
+    <string name="txtNotifications">Notifications:</string>
 </resources>

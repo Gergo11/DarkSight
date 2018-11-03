@@ -7,11 +7,14 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
+
+import com.gergo.darksight.Logic.ChatEngine;
 import com.gergo.darksight.UI.PagerAdapter;
 
 
-
 public class MainActivity extends AppCompatActivity {
+
+    private ChatEngine chatEngine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,13 +22,15 @@ public class MainActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+        chatEngine = ChatEngine.getChatEngine();
+        //chatEngine.setContext(this);
         TabLayout tabLayout = findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText("Tab 1"));
         tabLayout.addTab(tabLayout.newTab().setText("Tab 2"));
         tabLayout.addTab(tabLayout.newTab().setText("Tab 3"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-        final ViewPager viewPager = (ViewPager)findViewById(R.id.tab_pager);
-        final PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager(),tabLayout.getTabCount());
+        final ViewPager viewPager = (ViewPager) findViewById(R.id.tab_pager);
+        final PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount(),this);
         viewPager.setAdapter(pagerAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.BaseOnTabSelectedListener() {
@@ -44,7 +49,5 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
     }
-
 }

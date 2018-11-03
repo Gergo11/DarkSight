@@ -21,8 +21,8 @@ public class SplashActivity extends AppCompatActivity {
         final Animation animation_logo_1 = AnimationUtils.loadAnimation(getBaseContext(),R.anim.rotate);
         final Animation animation_logo_2 = AnimationUtils.loadAnimation(getBaseContext(),R.anim.antirotate);
         final ImageView backgroundView = (ImageView) findViewById(R.id.background);
-        final Animation animation_background_1 = AnimationUtils.loadAnimation(getBaseContext(),R.anim.move_up);
-        final Animation animation_background_2 = AnimationUtils.loadAnimation(getBaseContext(),R.anim.move_down);
+        final Animation animation_background_1 = AnimationUtils.loadAnimation(getBaseContext(),R.anim.move_down);
+        final Animation animation_background_2 = AnimationUtils.loadAnimation(getBaseContext(),R.anim.move_up);
 
         logoView.startAnimation(animation_logo_2);
         animation_logo_2.setAnimationListener(new Animation.AnimationListener() {
