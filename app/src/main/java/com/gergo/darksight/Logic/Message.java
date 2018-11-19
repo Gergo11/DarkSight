@@ -16,12 +16,22 @@ public class Message {
         return isLocalMessage;
     }
 
-    public String getMessageString() throws JSONException {
-        return messageData.getString("message");
+    public String getMessageString()  {
+        try {
+            return messageData.getString("message");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return "Message error!";
     }
 
-    public String getUsername () throws JSONException {
-        return messageData.getString("userName");
+    public String getUsername () {
+        try {
+            return messageData.getString("userName");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return "Message error!";
     }
 
     public JSONObject getMessageData() {

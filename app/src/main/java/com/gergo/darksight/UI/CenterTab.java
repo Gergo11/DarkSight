@@ -42,6 +42,4 @@ public class CenterTab extends Fragment {
         });
         return view;
     }
-
-
 }

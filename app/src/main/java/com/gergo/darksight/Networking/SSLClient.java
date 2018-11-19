@@ -21,6 +21,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -31,8 +32,8 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class SSLClient {
     private static SSLContext sslContext;
-    private final String passwd = "passwd here";
-    private final String keyStorePasswd = "keystore passwd";
+    private final String passwd = "asdf1234";
+    private final String keyStorePasswd = "asdf1234";
     private String serverIpAddress;
     private SSLSocket clientSocket;
     private int serverPort = 1212;
@@ -45,26 +46,29 @@ public class SSLClient {
         try {
             KeyStore trustStore = KeyStore.getInstance("BKS");
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-           // InputStream trustInput = context.getResources().openRawResource(R.raw.client_trust_store);
-            //trustStore.load(trustInput, passwd.toCharArray());
+            InputStream trustInput = context.getResources().openRawResource(R.raw.client_trust_store);
+            trustStore.load(trustInput, passwd.toCharArray());
             trustManagerFactory.init(trustStore);
 
             KeyStore keyStore = KeyStore.getInstance("BKS");
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            //InputStream keyStoreInput = context.getResources().openRawResource(R.raw.client_key_store);
-           // keyStore.load(keyStoreInput, keyStorePasswd.toCharArray());
+            keyManagerFactory.init(keyStore,keyStorePasswd.toCharArray());
+            InputStream keyStoreInput = context.getResources().openRawResource(R.raw.client_key_store);
+            keyStore.load(keyStoreInput, keyStorePasswd.toCharArray());
 
             sslContext = SSLContext.getInstance("TLS");
             sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
-       // } catch (IOException e) {
-       //     e.printStackTrace();
-       // } catch (CertificateException e) {
-      //      e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (KeyStoreException e) {
             e.printStackTrace();
         } catch (KeyManagementException e) {
+            e.printStackTrace();
+        } catch (UnrecoverableKeyException e) {
             e.printStackTrace();
         }
     }
@@ -98,6 +102,7 @@ public class SSLClient {
                 InetAddress serverAddr = InetAddress.getByName(serverIpAddress);
                 SSLSocketFactory socketFactory = (SSLSocketFactory) SSLClient.sslContext.getSocketFactory();
                 clientSocket = (SSLSocket) socketFactory.createSocket(serverAddr,serverPort);
+                clientSocket.startHandshake();
                 input = new BufferedReader(new InputStreamReader( clientSocket.getInputStream()));
                 while(clientSocket.isConnected()){
                     String msgRaw = input.readLine();

@@ -42,17 +42,23 @@ public class ChatEngine extends BaseAdapter{
         messageList.add(msg);
         this.notifyDataSetChanged();
         if(sslClient != null){
-            //sslClient.sendMesseage(msg);
+            sslClient.sendMesseage(msg);
         }
         if(sslServer != null){
-           //sslServer.sendMesseage(msg);
+           sslServer.sendMesseage(msg);
         }
     }
     public void reciveMessage (String msgRaw){
         JSONObject msgJson = messageFactory.convertMesseage(messageFactory.createJson(msgRaw),isAdvancedEnc);
         Message msg = new Message(msgJson,false);
-        messageList.add(msg);
-        notifyDataSetChanged();
+        if(!Common.isConsent) {
+            if (msg.getMessageString()== Common.connectionCode){
+                Common.isConsent = true;
+            }
+        }else {
+            messageList.add(msg);
+            notifyDataSetChanged();
+        }
     }
 
     public static ChatEngine getChatEngine() {
@@ -90,23 +96,15 @@ public class ChatEngine extends BaseAdapter{
             view = messageInfalter.inflate(R.layout.local_message, null);
             messageHolder.messageBody=(TextView)view.findViewById(R.id.message_text);
             view.setTag(messageHolder);
-            try {
-                messageHolder.messageBody.setText(message.getMessageString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            messageHolder.messageBody.setText(message.getMessageString());
         }else{
             view = messageInfalter.inflate(R.layout.remote_message,null);
             messageHolder.avatar = (View) view.findViewById(R.id.avatar);
             messageHolder.userName = (TextView) view.findViewById(R.id.user_name);
             messageHolder.messageBody = (TextView) view.findViewById(R.id.message_text);
             view.setTag(messageHolder);
-            try {
-                messageHolder.userName.setText(message.getUsername());
-                messageHolder.messageBody.setText(message.getMessageString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            messageHolder.userName.setText(message.getUsername());
+            messageHolder.messageBody.setText(message.getMessageString());
             GradientDrawable avatar = (GradientDrawable) messageHolder.avatar.getBackground();
             avatar.setColor(Color.green(20));
         }

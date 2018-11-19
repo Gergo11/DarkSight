@@ -1,16 +1,19 @@
 package com.gergo.darksight.Networking;
 
+import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 import com.gergo.darksight.Logic.ChatEngine;
+import com.gergo.darksight.Logic.Common;
+import com.gergo.darksight.Logic.ConnectDialog;
 import com.gergo.darksight.Logic.Message;
+import com.gergo.darksight.MainActivity;
 import com.gergo.darksight.R;
-
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,47 +32,48 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class SSLServer {
     private int serverPort = 1212;
-    private Context context;
-    private String trustPasswd;
-    private String keyStorePasswd;
+    private MainActivity mainActivity;
+    private Activity context;
+    private String trustPasswd = "asdf1234";
+    private String keyStorePasswd = "asdf1234";
     private static SSLContext sslContext;
     private SSLServerSocket serverSocket;
     private BufferedReader input;
     private ChatEngine chatEngine;
     private  SSLSocket accepted;
+    private  SSLServer.ServerThread thread = null;
 
-    public SSLServer(Context context,ChatEngine chatEngine) {
-        this.context = context;
+    public SSLServer(MainActivity mainActivity,ChatEngine chatEngine) {
+        this.mainActivity = mainActivity;
+        this.context = mainActivity;
         this.chatEngine = chatEngine;
     }
 
-    private SSLContext createSSLContext(){
+    private void createSSLContext(){
         try{
             KeyStore trustStore = KeyStore.getInstance("BKS");
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            //InputStream trustInput = context.getResources().openRawResource(R.raw.server_trust_store);
-            //trustStore.load(trustInput, trustPasswd.toCharArray());
+            InputStream trustInput = context.getResources().openRawResource(R.raw.server_trust_store);
+            trustStore.load(trustInput, trustPasswd.toCharArray());
             trustManagerFactory.init(trustStore);
-
+           // Log.i("sslcontext",trustStore.toString()+"Kecske---------------------------------------------");
             KeyStore keyStore = KeyStore.getInstance("BKS");
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            //InputStream keyStoreInput = context.getResources().openRawResource(R.raw.server_key_store);
-            //keyStore.load(keyStoreInput, keyStorePasswd.toCharArray());
-
+            keyManagerFactory.init(keyStore,keyStorePasswd.toCharArray());
+            InputStream keyStoreInput = context.getResources().openRawResource(R.raw.server_key_store);
+            keyStore.load(keyStoreInput, keyStorePasswd.toCharArray());
             sslContext = SSLContext.getInstance("TLS");
+            Log.i("sslcontext","Kecske---------------------------------------------");
             sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
-
-            initializeServer();
-            return sslContext;
         } catch (Exception ex){
             ex.printStackTrace();
         }
-        return null;
     }
 
     public void initializeServer (){
         try{
-            SSLServer.ServerThread thread = new SSLServer.ServerThread();
+            createSSLContext();
+            thread = new SSLServer.ServerThread();
             thread.start();
             chatEngine.setSslServer(this);
         }
@@ -97,8 +101,18 @@ public class SSLServer {
                 accepted = (SSLSocket) serverSocket.accept();
                 input = new BufferedReader(new InputStreamReader( accepted.getInputStream()));
                 while(accepted.isConnected()){
-                    String msgRaw = input.readLine();
-                    chatEngine.reciveMessage(msgRaw);
+                    if(Common.isConnected == false){
+                        Common.isConnected = true;
+                        if(Common.inBackGround){
+                           //sendNotification
+                        }
+                        else{
+                            mainActivity.showDialog();
+                        }
+                    }else {
+                        String msgRaw = input.readLine();
+                        chatEngine.reciveMessage(msgRaw);
+                    }
                 }
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -107,4 +121,18 @@ public class SSLServer {
             }
         }
     }
+    public void restartServer(){
+        try {
+            accepted.close();
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(thread.isAlive()){
+            thread.interrupt();
+            Common.isConsent=false;
+        }
+       initializeServer();
+    }
+
 }
