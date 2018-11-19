@@ -45,6 +45,7 @@ public class LeftTab extends Fragment{
         Button connectButton = view.findViewById(R.id.btnConnect);
         final CheckBox chkRemember = view.findViewById(R.id.chkRemember);
         final Spinner spinner = view.findViewById(R.id.spSavedIp);
+        
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(view.getContext(),R.layout.spinner_item,readFromDB());
         spinner.setAdapter(spinnerAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
