@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.gergo.darksight.Audio.AudioMaker;
 import com.gergo.darksight.Networking.SSLClient;
 import com.gergo.darksight.Networking.SSLServer;
 import com.gergo.darksight.R;
@@ -31,9 +32,11 @@ public class ChatEngine extends BaseAdapter{
     private List<Message> messageList = new ArrayList<Message>();
     private SSLClient sslClient;
     private SSLServer sslServer;
+    private AudioMaker audioMaker;
 
     public ChatEngine() {
         messageFactory = MessageFactory.getMessageFactory();
+        audioMaker = AudioMaker.getAudioMaker();
     }
 
     public void sendMessage(String message){
@@ -49,6 +52,9 @@ public class ChatEngine extends BaseAdapter{
         }
     }
     public void reciveMessage (String msgRaw){
+        if(Common.SOUND){
+            audioMaker.ping();
+        }
         JSONObject msgJson = messageFactory.convertMesseage(messageFactory.createJson(msgRaw),isAdvancedEnc);
         Message msg = new Message(msgJson,false);
         if(!Common.isConsent) {

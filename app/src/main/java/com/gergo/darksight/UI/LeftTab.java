@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.gergo.darksight.Audio.AudioMaker;
 import com.gergo.darksight.Logic.ChatEngine;
 import com.gergo.darksight.Logic.Common;
 import com.gergo.darksight.Logic.IpContract;
@@ -45,7 +46,7 @@ public class LeftTab extends Fragment{
         Button connectButton = view.findViewById(R.id.btnConnect);
         final CheckBox chkRemember = view.findViewById(R.id.chkRemember);
         final Spinner spinner = view.findViewById(R.id.spSavedIp);
-        
+        final AudioMaker audioMaker = AudioMaker.getAudioMaker();
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(view.getContext(),R.layout.spinner_item,readFromDB());
         spinner.setAdapter(spinnerAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -68,6 +69,9 @@ public class LeftTab extends Fragment{
             public void onClick(View view) {
                 if (chkRemember.isChecked()){
                     instertToDB(txtConnectIP.getText().toString());
+                }
+                if(Common.SOUND){
+                    audioMaker.connect();
                 }
                 if(txtUseName.getText()!=null) {
                     Common.USER_NAME = txtUseName.getText().toString();

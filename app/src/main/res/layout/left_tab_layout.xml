@@ -40,7 +40,8 @@
             android:layout_height="wrap_content"
             android:gravity="top"
             android:layout_gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_centerHorizontal="true">
             <android.support.v7.widget.AppCompatCheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -54,12 +55,12 @@
                 android:layout_marginTop="180dp"
                 android:hint="@string/txtInpIP" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/btnConnect"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
                 android:layout_marginTop="180dp"
-                android:text="@string/btnconnect"
+                android:background="@drawable/connect_selector"
                 android:textColor="@color/colorText" />
         </LinearLayout>
 
@@ -68,7 +69,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="top"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_centerHorizontal="true">
 
             <android.support.v7.widget.AppCompatSpinner
                 android:id="@+id/spSavedIp"
@@ -86,7 +88,8 @@
             android:layout_height="wrap_content"
             android:gravity="top"
             android:layout_gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_centerHorizontal="true">
 
             <TextView
                 android:id="@+id/txtIPTitle"

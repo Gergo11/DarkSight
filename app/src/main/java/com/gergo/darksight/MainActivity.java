@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.gergo.darksight.Audio.AudioMaker;
 import com.gergo.darksight.Logic.ChatEngine;
 import com.gergo.darksight.Logic.Common;
 import com.gergo.darksight.Logic.ConnectDialog;
@@ -27,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements ConnectDialog.Not
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+        AudioMaker audioMaker = AudioMaker.getAudioMaker();
+        audioMaker.setContext(this);
         chatEngine = ChatEngine.getChatEngine(); //needs to be before the ssl server
         //chatEngine.setContext(this);
         sslServer = new SSLServer(this, chatEngine);
