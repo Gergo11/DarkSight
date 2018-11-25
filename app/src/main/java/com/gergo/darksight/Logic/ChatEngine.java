@@ -12,13 +12,12 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.gergo.darksight.Audio.AudioMaker;
+import com.gergo.darksight.Encryption.Decryptor;
+import com.gergo.darksight.Encryption.Encryptor;
 import com.gergo.darksight.Networking.SSLClient;
 import com.gergo.darksight.Networking.SSLServer;
 import com.gergo.darksight.R;
-
-import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,29 +32,44 @@ public class ChatEngine extends BaseAdapter{
     private SSLClient sslClient;
     private SSLServer sslServer;
     private AudioMaker audioMaker;
+    private Encryptor encryptor;
+    private Decryptor decryptor;
 
     public ChatEngine() {
         messageFactory = MessageFactory.getMessageFactory();
         audioMaker = AudioMaker.getAudioMaker();
+        encryptor = Encryptor.getEncryptor();
+        decryptor = Decryptor.getDecryptor();
     }
 
     public void sendMessage(String message){
         JSONObject msgJson = messageFactory.createMesseage(userName,message,isAdvancedEnc);
         Message msg = new Message(msgJson,true);
         messageList.add(msg);
-        this.notifyDataSetChanged();
-        if(sslClient != null){
-            sslClient.sendMesseage(msg);
+        String toBeSent = null;
+        if(Common.ADVANCED_ENCRYPTION) {
+            toBeSent = encryptor.advancedEncrypt(msg);
+        }else {
+            toBeSent =encryptor.encrypt(msg);
         }
-        if(sslServer != null){
-           sslServer.sendMesseage(msg);
+        this.notifyDataSetChanged();
+        if(Common.isClientMode){
+            sslClient.sendMesseage(toBeSent);
+        }else {
+           sslServer.sendMesseage(toBeSent);
         }
     }
     public void reciveMessage (String msgRaw){
+        String messeageDataDecrypted = null;
         if(Common.SOUND){
             audioMaker.ping();
         }
-        JSONObject msgJson = messageFactory.convertMesseage(messageFactory.createJson(msgRaw),isAdvancedEnc);
+        if(Common.ADVANCED_ENCRYPTION){
+            messeageDataDecrypted = decryptor.advancedDecrypt(msgRaw);
+        }else {
+            messeageDataDecrypted = decryptor.decrypt(msgRaw);
+        }
+        JSONObject msgJson = messageFactory.convertMesseage(messageFactory.createJson(messeageDataDecrypted),isAdvancedEnc);
         Message msg = new Message(msgJson,false);
         if(!Common.isConsent) {
             if (msg.getMessageString()== Common.connectionCode){

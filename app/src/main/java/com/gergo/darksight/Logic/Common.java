@@ -10,4 +10,6 @@ public class Common {
     public static boolean requireConsent = true;
     public static boolean inBackGround  = false;
     public static String connectionCode = "21X12";
+    public static boolean secretConnectionInProgress = false;
+    public static boolean isClientMode = false;
 }

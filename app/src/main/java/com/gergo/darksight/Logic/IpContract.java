@@ -4,8 +4,7 @@ import android.provider.BaseColumns;
 
 public final class IpContract {
 
-    private IpContract() {
-    }
+    private IpContract() { }
 
     public static class IpEntry implements BaseColumns{
         public  static final String TABLE_NAME = "IP_STORE";

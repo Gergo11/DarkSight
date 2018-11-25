@@ -17,19 +17,9 @@ public class MessageFactory {
 
     public JSONObject createMesseage(String userName, String msg, boolean isAdvancedEnc) {
         JSONObject message = new JSONObject();
-        String encryptedUserName;
-        String encryptedMessage;
-
-        if (isAdvancedEnc) {
-            encryptedUserName = Encryptor.advancedEncrypt(userName);
-            encryptedMessage = Encryptor.advancedEncrypt(msg);
-        } else {
-            encryptedUserName = Encryptor.encrypt(userName);
-            encryptedMessage = Encryptor.encrypt(msg);
-        }
         try {
-            message.put("userName", encryptedUserName);
-            message.put("message", encryptedMessage);
+            message.put("userName", userName);
+            message.put("message", msg);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -40,15 +30,15 @@ public class MessageFactory {
         JSONObject responseMsg = new JSONObject();
         if (isAdvancedEnc) {
             try {
-                responseMsg.put("userName", Decryptor.advancedDecrypt(msg.getString("userName")));
-                responseMsg.put("messeage", Decryptor.advancedDecrypt(msg.getString("message")));
+                responseMsg.put("userName", msg.getString("userName"));
+                responseMsg.put("messeage", msg.getString("message"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         } else {
             try {
-                responseMsg.put("userName", Decryptor.decrypt(msg.getString("userName")));
-                responseMsg.put("messeage", Decryptor.decrypt(msg.getString("message")));
+                responseMsg.put("userName", msg.getString("userName"));
+                responseMsg.put("messeage", msg.getString("message"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }

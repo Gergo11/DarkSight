@@ -18,10 +18,10 @@ public class RightTab extends Fragment {
     @Override
     public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LayoutInflater lf = getActivity().getLayoutInflater();
-        View view = lf.inflate(R.layout.left_tab_layout, container, false);
-        final Switch swSound = view.findViewById(R.id.swSound);
+        View view = lf.inflate(R.layout.right_tab_layout, container, false);
         Switch swAdvancedEnc = view.findViewById(R.id.swAdvancedEnc);
         Switch swNotifications = view.findViewById(R.id.swNotifications);
+        Switch swSound = view.findViewById(R.id.swSound);
         swSound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {

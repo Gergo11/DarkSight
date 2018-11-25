@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -43,11 +44,12 @@ public class LeftTab extends Fragment{
         final EditText txtConnectIP = view.findViewById(R.id.txtInIP);
         final EditText txtUseName = view.findViewById(R.id.txtUserName);
         TextView txtIP = view.findViewById(R.id.txtIP);
-        Button connectButton = view.findViewById(R.id.btnConnect);
+        ImageButton connectButton = view.findViewById(R.id.btnConnect);
         final CheckBox chkRemember = view.findViewById(R.id.chkRemember);
-        final Spinner spinner = view.findViewById(R.id.spSavedIp);
         final AudioMaker audioMaker = AudioMaker.getAudioMaker();
+        mDbHelper = new IpReaderDbHelper(getContext());
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(view.getContext(),R.layout.spinner_item,readFromDB());
+        final Spinner spinner = view.findViewById(R.id.spSavedIp);
         spinner.setAdapter(spinnerAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -59,7 +61,6 @@ public class LeftTab extends Fragment{
 
             }
         });
-        mDbHelper = new IpReaderDbHelper(getContext());
         ipUtil = IpUtil.getIpUtil();
         ipUtil.setAct(getActivity());
         chatEngine = ChatEngine.getChatEngine();
@@ -67,6 +68,7 @@ public class LeftTab extends Fragment{
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Common.isClientMode = true;
                 if (chkRemember.isChecked()){
                     instertToDB(txtConnectIP.getText().toString());
                 }
@@ -81,6 +83,7 @@ public class LeftTab extends Fragment{
                 }
                 sslClient = new SSLClient(getContext(), chatEngine);
                 chatEngine.setSslClient(sslClient);
+                Common.secretConnectionInProgress = true;
                 sslClient.initializeConnection(txtConnectIP.getText().toString());
             }
         });
@@ -109,9 +112,7 @@ public class LeftTab extends Fragment{
     }
 
     private List<String> readFromDB() {
-
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
         String[] projection = {
                 BaseColumns._ID,
                 IpContract.IpEntry.COLUMN_NAME_IP
