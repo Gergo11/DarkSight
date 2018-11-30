@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">DarkSight</string>
     <string name="action_settings">Settings</string>
-    <string name="txtInputTitle">Enter the remote IP address below. And check the checkbox if you want th IP stored.</string>
-    <string name="txtInpIP">Enter remote IP here!</string>
+    <string name="txtInputTitle">Enter the remote IP address below, and check the checkbox if you want th IP stored.</string>
+    <string name="txtInpIP">Enter the remote IP here!</string>
     <string name="txtIPTitle">Your Own IP:</string>
     <string name="txtIp">IP is not avaible!</string>
     <string name="txtInMessage">Type your message here.</string>
@@ -13,6 +13,9 @@
     <string name="yes">yes</string>
     <string name="no">no</string>
     <string name="spinnerNoIps">There are no stored IP-s!</string>
-    <string name="txtInpUserName">Enter name here!</string>
+    <string name="txtInpUserName">Enter your name here!</string>
     <string name="txtInpUserNameDefault">John Doe</string>
+    <string name="notification_text">Somebody wants to connect!</string>
+    <string name="notification_title">Connection!</string>
+    <string name="spinner_prompt">Select from saved IPs.</string>
 </resources>

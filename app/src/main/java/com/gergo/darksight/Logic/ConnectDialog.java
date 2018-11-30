@@ -9,6 +9,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 
+import com.gergo.darksight.MainActivity;
+import com.gergo.darksight.Networking.SSLServer;
+import com.gergo.darksight.Networking.SendThread;
 import com.gergo.darksight.R;
 
 public class ConnectDialog extends DialogFragment {
@@ -33,7 +36,9 @@ public class ConnectDialog extends DialogFragment {
         builder.setMessage(R.string.connect_question)
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-
+                        MainActivity mainActivity = (MainActivity)getContext();
+                        mainActivity.sendConsent();
+                        Common.isConsent = true;
                     }
                 })
                 .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {

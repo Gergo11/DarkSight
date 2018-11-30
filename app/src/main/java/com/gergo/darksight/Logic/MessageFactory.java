@@ -1,5 +1,7 @@
 package com.gergo.darksight.Logic;
 
+import android.util.JsonReader;
+
 import com.gergo.darksight.Encryption.Decryptor;
 import com.gergo.darksight.Encryption.Encryptor;
 
@@ -31,14 +33,14 @@ public class MessageFactory {
         if (isAdvancedEnc) {
             try {
                 responseMsg.put("userName", msg.getString("userName"));
-                responseMsg.put("messeage", msg.getString("message"));
+                responseMsg.put("message", msg.getString("message"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         } else {
             try {
                 responseMsg.put("userName", msg.getString("userName"));
-                responseMsg.put("messeage", msg.getString("message"));
+                responseMsg.put("message", msg.getString("message"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -53,11 +55,16 @@ public class MessageFactory {
         return msgFact;
     }
     public JSONObject createJson(String messeage){
-        JSONObject outputMesseage = new JSONObject();
-        try {
-            new JSONObject(messeage);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        JSONObject outputMesseage = null;
+        if(!messeage.equals("")) {
+            try {
+                outputMesseage = new JSONObject(messeage);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        else{
+            outputMesseage = new JSONObject();
         }
         return outputMesseage;
     }

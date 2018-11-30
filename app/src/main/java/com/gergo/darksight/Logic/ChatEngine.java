@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.util.Log;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,13 +17,15 @@ import com.gergo.darksight.Encryption.Encryptor;
 import com.gergo.darksight.Networking.SSLClient;
 import com.gergo.darksight.Networking.SSLServer;
 import com.gergo.darksight.R;
+import com.gergo.darksight.UI.RightTab;
+
 import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatEngine extends BaseAdapter{
+public class ChatEngine extends BaseAdapter {
 
-    public static boolean isAdvancedEnc = false;
     public static String userName = Common.USER_NAME;
     private static ChatEngine chatEngine = null;
     private MessageFactory messageFactory = null;
@@ -34,6 +36,8 @@ public class ChatEngine extends BaseAdapter{
     private AudioMaker audioMaker;
     private Encryptor encryptor;
     private Decryptor decryptor;
+    private RightTab rightTab;
+
 
     public ChatEngine() {
         messageFactory = MessageFactory.getMessageFactory();
@@ -42,47 +46,69 @@ public class ChatEngine extends BaseAdapter{
         decryptor = Decryptor.getDecryptor();
     }
 
-    public void sendMessage(String message){
-        JSONObject msgJson = messageFactory.createMesseage(userName,message,isAdvancedEnc);
-        Message msg = new Message(msgJson,true);
+    public void disconnect() {
+        if (Common.isClientMode) {
+            sslClient.disconnect();
+        } else {
+            sslServer.disconnect();
+        }
+        messageList.clear();
+        reloadCommon();
+    }
+
+    private void reloadCommon() {
+        Common.RECIEVE_KEYS = true;
+        Common.SEND_KEYS = true;
+        Common.isConnected = false;
+        Common.isConsent = false;
+        Common.secretConnectionInProgress = false;
+        Common.isClientMode =false;
+    }
+
+    public void sendMessage(String message) {
+        JSONObject msgJson = messageFactory.createMesseage(userName, message, Common.ADVANCED_ENCRYPTION);
+        Message msg = new Message(msgJson, true);
         messageList.add(msg);
         String toBeSent = null;
-        if(Common.ADVANCED_ENCRYPTION) {
+        if (Common.ADVANCED_ENCRYPTION) {
             toBeSent = encryptor.advancedEncrypt(msg);
-        }else {
-            toBeSent =encryptor.encrypt(msg);
+        } else {
+            toBeSent = encryptor.encrypt(msg);
+
         }
         this.notifyDataSetChanged();
-        if(Common.isClientMode){
+        if (Common.isClientMode) {
             sslClient.sendMesseage(toBeSent);
-        }else {
-           sslServer.sendMesseage(toBeSent);
+        } else {
+            sslServer.sendMesseage(toBeSent);
         }
     }
-    public void reciveMessage (String msgRaw){
+
+    public void reciveMessage(String msgRaw) {
         String messeageDataDecrypted = null;
-        if(Common.SOUND){
+        if (Common.SOUND) {
             audioMaker.ping();
         }
-        if(Common.ADVANCED_ENCRYPTION){
+        if (Common.ADVANCED_ENCRYPTION) {
             messeageDataDecrypted = decryptor.advancedDecrypt(msgRaw);
-        }else {
+        } else {
             messeageDataDecrypted = decryptor.decrypt(msgRaw);
         }
-        JSONObject msgJson = messageFactory.convertMesseage(messageFactory.createJson(messeageDataDecrypted),isAdvancedEnc);
-        Message msg = new Message(msgJson,false);
-        if(!Common.isConsent) {
-            if (msg.getMessageString()== Common.connectionCode){
+        JSONObject msgJson = messageFactory.convertMesseage(messageFactory.createJson(messeageDataDecrypted), Common.ADVANCED_ENCRYPTION);
+        Message msg = new Message(msgJson, false);
+        if (!Common.isConsent) {
+            if (msg.getMessageString() == Common.connectionCode) {
                 Common.isConsent = true;
             }
-        }else {
+        } else {
             messageList.add(msg);
+
             notifyDataSetChanged();
         }
     }
 
     public static ChatEngine getChatEngine() {
-        if(chatEngine == null){
+        if (chatEngine == null) {
             chatEngine = new ChatEngine();
         }
         return chatEngine;
@@ -110,15 +136,15 @@ public class ChatEngine extends BaseAdapter{
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         MessageViewHolder messageHolder = new MessageViewHolder();
-        LayoutInflater messageInfalter = (LayoutInflater)context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater messageInfalter = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         Message message = messageList.get(i);
-        if(message.isLocalMessage()){
+        if (message.isLocalMessage()) {
             view = messageInfalter.inflate(R.layout.local_message, null);
-            messageHolder.messageBody=(TextView)view.findViewById(R.id.message_text);
+            messageHolder.messageBody = (TextView) view.findViewById(R.id.message_text);
             view.setTag(messageHolder);
             messageHolder.messageBody.setText(message.getMessageString());
-        }else{
-            view = messageInfalter.inflate(R.layout.remote_message,null);
+        } else {
+            view = messageInfalter.inflate(R.layout.remote_message, null);
             messageHolder.avatar = (View) view.findViewById(R.id.avatar);
             messageHolder.userName = (TextView) view.findViewById(R.id.user_name);
             messageHolder.messageBody = (TextView) view.findViewById(R.id.message_text);
@@ -131,6 +157,10 @@ public class ChatEngine extends BaseAdapter{
         return view;
     }
 
+    public void setRightTab(RightTab rightTab) {
+        this.rightTab = rightTab;
+    }
+
     public void setSslClient(SSLClient sslClient) {
         this.sslClient = sslClient;
     }
@@ -139,8 +169,12 @@ public class ChatEngine extends BaseAdapter{
         this.sslServer = sslServer;
     }
 
+    public void setSwitch() {
+      //  rightTab.setSwitch();
+    }
 }
-class MessageViewHolder{
+
+class MessageViewHolder {
     public View avatar;
     public TextView userName;
     public TextView messageBody;

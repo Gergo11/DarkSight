@@ -1,11 +1,20 @@
 package com.gergo.darksight;
 
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -71,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements ConnectDialog.Not
     protected void onResume() {
         super.onResume();
         Common.inBackGround = false;
-        if (Common.isConnected) {
+        if (!Common.isConsent &&Common.isConnected) {
             showDialog();
         }
     }
@@ -93,4 +102,25 @@ public class MainActivity extends AppCompatActivity implements ConnectDialog.Not
         sslServer.restartServer();
     }
 
+    public void sendNotification() {
+        PendingIntent pi = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+        Resources r = getResources();
+        Notification notification = new NotificationCompat.Builder(this,"0")
+                .setTicker(r.getString(R.string.notification_title))
+                .setSmallIcon(R.drawable.logo)
+                .setContentTitle(r.getString(R.string.notification_title))
+                .setContentText(r.getString(R.string.notification_text))
+                .setContentIntent(pi)
+                .setAutoCancel(true)
+                .build();
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(0, notification);
+    }
+    public void sendConsent(){
+        sslServer.sendMesseage(Common.connectionCode);
+        if(Common.ADVANCED_ENCRYPTION){
+            //sslServer.sendMesseage(Common.advancedEncryptionCode);
+        }
+    }
 }

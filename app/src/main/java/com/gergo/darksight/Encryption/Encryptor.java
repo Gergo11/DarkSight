@@ -1,5 +1,7 @@
 package com.gergo.darksight.Encryption;
 
+import android.util.Log;
+
 import com.gergo.darksight.Logic.Message;
 
 import org.bouncycastle.crypto.CipherParameters;
@@ -10,15 +12,16 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.crypto.SecretKey;
+
 public class Encryptor {
 
     private static  Encryptor encryptor = null;
     private LevelOneRSA levelOneRSA = null;
-    private LevelTwoElliptic levelTwoElliptic = null;
     private LevelThreeAES levelThreeAES = null;
     private PublicKey rsaKey = null;
-    private Key eccKey = null;
-    private CipherParameters aesCipherParameters = null;
+    private PublicKey eccKey = null;
+    private SecretKey aesKey = null;
 
     public Encryptor() {
         init();
@@ -26,31 +29,26 @@ public class Encryptor {
 
     private void init() {
         levelOneRSA = LevelOneRSA.getLevelOneRSA();
-        levelTwoElliptic = LevelTwoElliptic.getLevelTwoElliptic();
         levelThreeAES = LevelThreeAES.getLevelThreeAES();
     }
-
-    public void fillKeys(CipherParameters aes, PublicKey rsa,Key eccKey){
-        this.rsaKey = rsa;
-        this.eccKey = eccKey;
-        this.aesCipherParameters = aes;
-    }
-
 
     public String advancedEncrypt(Message message) {
         String msg = "Error";
         try {
-            msg = levelThreeAES.encrypt(levelTwoElliptic.encrypt(eccKey,levelOneRSA.encrypt(message.toString(),rsaKey)),aesCipherParameters);
+            Log.e("TAG","RSA " + levelOneRSA.encrypt(message.getMessageData().toString(),rsaKey));
+            Log.e("TAG","RSA + EC " +levelOneRSA.encrypt(message.getMessageData().toString(),rsaKey));
+            msg = levelThreeAES.encrypt(levelOneRSA.encrypt(message.getMessageData().toString(),rsaKey),aesKey);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Log.e("TAG","encrapted messeage "+msg);
         return msg;
     }
 
     public String encrypt(Message message) {
         String msg = "Error";
         try {
-            msg = levelOneRSA.encrypt(message.toString(),rsaKey);
+            msg = levelOneRSA.encrypt(message.getMessageData().toString(),rsaKey);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,11 +68,11 @@ public class Encryptor {
         this.rsaKey = rsaKey;
     }
 
-    public void setEccKey(Key eccKey) {
+    public void setEccKey(PublicKey eccKey) {
         this.eccKey = eccKey;
     }
 
-    public void setAesCipherParameters(Key aesCipherParameters) {
-        this.aesCipherParameters = (CipherParameters) aesCipherParameters;
+    public void setAesKey(SecretKey key) {
+        this.aesKey =  key;
     }
 }

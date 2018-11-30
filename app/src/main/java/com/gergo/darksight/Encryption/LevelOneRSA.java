@@ -1,5 +1,8 @@
 package com.gergo.darksight.Encryption;
 
+import android.util.Base64;
+import android.util.Log;
+
 import org.bouncycastle.crypto.AsymmetricBlockCipher;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.CipherParameters;
@@ -8,17 +11,27 @@ import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
 import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.JCERSAPublicKey;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 public class LevelOneRSA {
 
     private static LevelOneRSA levelOneRSA =null;
-    private AsymmetricCipherKeyPair keyPair = null;
+    private KeyPair keyPair = null;
 
     public LevelOneRSA() {
         init();
@@ -32,60 +45,38 @@ public class LevelOneRSA {
         }
     }
 
-    public static String getHexString(byte[] b) throws Exception {
-        String result = "";
-        for (int i=0; i < b.length; i++) {
-            result +=
-                    Integer.toString( ( b[i] & 0xff ) + 0x100, 16).substring( 1 );
-        }
-        return result;
+    public KeyPair generateKeys() throws NoSuchAlgorithmException{
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+        kpg.initialize(2048);
+        return kpg.generateKeyPair();
     }
 
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length()-1;
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
-    }
-
-
-    public AsymmetricCipherKeyPair generateKeys() throws NoSuchAlgorithmException{
-
-        RSAKeyPairGenerator generator = new RSAKeyPairGenerator();
-        generator.init(new RSAKeyGenerationParameters
-                (
-                        new BigInteger("10001", 16),//publicExponent
-                        SecureRandom.getInstance("SHA1PRNG"),//pseudorandom number generator
-                        4096,//strength
-                        80//certainty
-                ));
-
-        return generator.generateKeyPair();
-    }
-
-    public String encrypt(String messeage, PublicKey publicKey) throws Exception{
-
-        byte[] data = messeage.getBytes();
-        Security.addProvider(new BouncyCastleProvider());
-        RSAEngine engine = new RSAEngine();
-        engine.init(true, (CipherParameters) publicKey); //true if encrypt
-        byte[] hexEncodedCipher = engine.processBlock(data, 0, data.length);
-        return getHexString(hexEncodedCipher);
+    public String encrypt(String message, PublicKey publicKey) throws Exception{
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        return Base64.encodeToString(cipher.doFinal(message.getBytes()),Base64.DEFAULT);
     }
 
     public String decrypt(String encrypted) throws InvalidCipherTextException {
-
-        Security.addProvider(new BouncyCastleProvider());
-        AsymmetricBlockCipher engine = new RSAEngine();
-        engine.init(false, keyPair.getPrivate()); //false for decryption
-        byte[] encryptedBytes = hexStringToByteArray(encrypted);
-        byte[] hexEncodedCipher = engine.processBlock(encryptedBytes, 0, encryptedBytes.length);
-        return new String (hexEncodedCipher);
+        Cipher cipher = null;
+        byte[] stringBytes = Base64.decode(encrypted.getBytes(),Base64.DEFAULT);
+        try {
+            cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
+            return new String(cipher.doFinal(stringBytes));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        }
+        return "Error decrypt!";
     }
-
-
 
     public static LevelOneRSA getLevelOneRSA(){
         if(levelOneRSA == null){
@@ -94,19 +85,12 @@ public class LevelOneRSA {
         return levelOneRSA;
     }
 
-    public CipherParameters getPublicKey(){
+    public String getPublicKey(){
+       String pub = Base64.encodeToString(keyPair.getPublic().getEncoded(),Base64.DEFAULT);
         if(keyPair.getPublic()==null){
             init();
-           return keyPair.getPublic();
+           return pub;
         }
-        return keyPair.getPublic();
+        return pub;
     }
-
-        //	AsymmetricCipherKeypair includes both private and public keys, but AsymmetricKeyPair includes only public
-
-       // AsymmetricCipherKeyPair keyPair = GenerateKeys();
-        //String encryptedMessage = Encrypt(plainMessage.getBytes("UTF-8"), keyPair.getPublic());
-        //String decryptedMessage = Decrypt(encryptedMessage, (AsymmetricKeyParameter) keyPair.getPrivate());
-
-
 }
