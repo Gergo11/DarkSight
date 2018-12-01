@@ -1,14 +1,10 @@
 package com.gergo.darksight.Encryption;
 
-import android.util.Log;
-
-import org.bouncycastle.crypto.InvalidCipherTextException;
-
 public class Decryptor {
 
     private static  Decryptor decryptor = null;
     private LevelOneRSA levelOneRSA = null;
-    private LevelThreeAES levelThreeAES = null;
+    private LevelTwoAES levelTwoAES = null;
 
     public Decryptor() {
         init();
@@ -16,14 +12,13 @@ public class Decryptor {
 
     private void init() {
         levelOneRSA = LevelOneRSA.getLevelOneRSA();
-        levelThreeAES = LevelThreeAES.getLevelThreeAES();
+        levelTwoAES = LevelTwoAES.getLevelTwoAES();
     }
 
     public String advancedDecrypt(String message) {
         String decryptedString = "Error";
         try {
-            Log.e("TAG","AES "+levelThreeAES.decrypt(message));
-            decryptedString = levelOneRSA.decrypt(levelThreeAES.decrypt(message));
+            decryptedString = levelOneRSA.decrypt(levelTwoAES.decrypt(message));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -32,12 +27,7 @@ public class Decryptor {
 
     public String decrypt(String message) {
         String decryptedString = "Error";
-        try {
-            decryptedString = levelOneRSA.decrypt(message);
-        } catch (InvalidCipherTextException e) {
-            e.printStackTrace();
-        }
-
+        decryptedString = levelOneRSA.decrypt(message);
         return decryptedString;
     }
     public static Decryptor getDecryptor(){

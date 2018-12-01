@@ -5,8 +5,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.gergo.darksight.MainActivity;
-
 public class PagerAdapter extends FragmentPagerAdapter {
     private int numberOfTabs;
     private Activity act;

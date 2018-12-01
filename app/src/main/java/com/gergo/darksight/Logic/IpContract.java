@@ -1,7 +1,5 @@
 package com.gergo.darksight.Logic;
 
-import android.provider.BaseColumns;
-
 public final class IpContract {
 
     public IpContract() { }
@@ -23,7 +21,6 @@ public final class IpContract {
             "CREATE TABLE " + TABLE_NAME + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     COLUMN_IP + " TEXT)";
-
 
     public static final String DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + TABLE_NAME;

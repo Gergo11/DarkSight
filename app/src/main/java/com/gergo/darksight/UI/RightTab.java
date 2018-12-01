@@ -2,8 +2,6 @@ package com.gergo.darksight.UI;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +10,6 @@ import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.Switch;
 
-import com.gergo.darksight.Logic.ChatEngine;
 import com.gergo.darksight.Logic.Common;
 import com.gergo.darksight.Logic.IpContract;
 import com.gergo.darksight.Logic.IpReaderDbHelper;
@@ -28,8 +25,6 @@ public class RightTab extends Fragment implements CompoundButton.OnCheckedChange
         View view = lf.inflate(R.layout.right_tab_layout, container, false);
         mDBHelper = new IpReaderDbHelper(getContext());
         swAdvancedEnc = view.findViewById(R.id.swAdvancedEnc);
-        ChatEngine chatEngine = ChatEngine.getChatEngine();
-        chatEngine.setRightTab(this);
         Switch swNotifications = view.findViewById(R.id.swNotifications);
         Switch swSound = view.findViewById(R.id.swSound);
         ImageButton imageButton = view.findViewById(R.id.btnClearDB);

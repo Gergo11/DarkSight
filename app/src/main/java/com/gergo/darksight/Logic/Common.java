@@ -3,7 +3,7 @@ package com.gergo.darksight.Logic;
 public class Common {
     public static  boolean RECIEVE_KEYS = true;
     public static boolean SEND_KEYS = true;
-    public static String USER_NAME = "test";
+    public static String USER_NAME = "";
     public static boolean ADVANCED_ENCRYPTION = true;
     public static boolean SOUND = true;
     public static boolean NOTIFICATIONS = true;

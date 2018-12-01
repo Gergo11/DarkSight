@@ -1,27 +1,11 @@
 package com.gergo.darksight.Encryption;
 
 import android.util.Base64;
-import android.util.Log;
-
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.engines.RSAEngine;
-import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
-import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.provider.JCERSAPublicKey;
-
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -57,7 +41,7 @@ public class LevelOneRSA {
         return Base64.encodeToString(cipher.doFinal(message.getBytes()),Base64.DEFAULT);
     }
 
-    public String decrypt(String encrypted) throws InvalidCipherTextException {
+    public String decrypt(String encrypted) {
         Cipher cipher = null;
         byte[] stringBytes = Base64.decode(encrypted.getBytes(),Base64.DEFAULT);
         try {

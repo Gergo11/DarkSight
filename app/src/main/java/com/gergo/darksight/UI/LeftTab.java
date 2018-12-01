@@ -1,12 +1,9 @@
 package com.gergo.darksight.UI;
 
 import android.content.ContentValues;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.provider.BaseColumns;
-import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +12,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -51,6 +47,7 @@ public class LeftTab extends Fragment {
         final ImageButton logoBtn = view.findViewById(R.id.logo_large_left);
         final Animation animation_logo_1 = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate);
         final Animation animation_logo_2 = AnimationUtils.loadAnimation(view.getContext(), R.anim.antirotate);
+        ImageButton btnSetUserName = view.findViewById(R.id.btnSetUserName);
         ImageButton btnDisconnect = view.findViewById(R.id.btnDisconnect);
         TextView txtIP = view.findViewById(R.id.txtIP);
         ImageButton connectButton = view.findViewById(R.id.btnConnect);
@@ -87,11 +84,6 @@ public class LeftTab extends Fragment {
                 if (Common.SOUND) {
                     audioMaker.connect();
                 }
-                if (txtUseName.getText() != null) {
-                    Common.USER_NAME = txtUseName.getText().toString();
-                } else {
-                    Common.USER_NAME = String.valueOf(R.string.txtInpUserNameDefault);
-                }
                 sslClient = new SSLClient(getContext(), chatEngine);
                 chatEngine.setSslClient(sslClient);
                 Common.secretConnectionInProgress = true;
@@ -109,6 +101,16 @@ public class LeftTab extends Fragment {
             @Override
             public void onClick(View view) {
                 chatEngine.disconnect();
+            }
+        });
+        btnSetUserName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (txtUseName.getText() != null) {
+                    Common.USER_NAME = txtUseName.getText().toString();
+                } else {
+                    Common.USER_NAME = String.valueOf(R.string.txtInpUserNameDefault);
+                }
             }
         });
         return view;

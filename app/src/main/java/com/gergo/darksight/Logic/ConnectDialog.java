@@ -10,15 +10,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 
 import com.gergo.darksight.MainActivity;
-import com.gergo.darksight.Networking.SSLServer;
-import com.gergo.darksight.Networking.SendThread;
 import com.gergo.darksight.R;
 
 public class ConnectDialog extends DialogFragment {
 
     public interface NoticeDialogListener {
-        public void onDialogPositiveClick(DialogFragment dialog);
-        public void onDialogNegativeClick(DialogFragment dialog);
+        void onDialogPositiveClick(DialogFragment dialog);
+        void onDialogNegativeClick(DialogFragment dialog);
     }
     NoticeDialogListener mListener;
     public void onAttach(Context context) {

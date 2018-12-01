@@ -1,7 +1,5 @@
 package com.gergo.darksight.Logic;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,7 +17,6 @@ public class Message {
     }
 
     public String getMessageString()  {
-        Log.e("TAG","messagedata:"+messageData.toString());
         try {
             return messageData.getString("message");
         } catch (JSONException e) {

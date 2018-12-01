@@ -6,12 +6,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
+
 import com.gergo.darksight.Encryption.Encryptor;
 import com.gergo.darksight.Encryption.LevelOneRSA;
-import com.gergo.darksight.Encryption.LevelThreeAES;
+import com.gergo.darksight.Encryption.LevelTwoAES;
 import com.gergo.darksight.Logic.ChatEngine;
 import com.gergo.darksight.Logic.Common;
 import com.gergo.darksight.R;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -31,6 +33,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.KeyManagerFactory;
@@ -108,9 +111,10 @@ public class SSLClient {
             try {
                 InetAddress serverAddr = InetAddress.getByName(serverIpAddress);
                 SSLSocketFactory socketFactory = (SSLSocketFactory) SSLClient.sslContext.getSocketFactory();
-                clientSocket = (SSLSocket) socketFactory.createSocket(serverAddr, serverPort);
-                clientSocket.startHandshake();
-                this.input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                this.clientSocket = (SSLSocket) socketFactory.createSocket(serverAddr, serverPort);
+                this.clientSocket.startHandshake();
+                this.input = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
+                Log.e("TAG", "cliensocket: " + this.clientSocket.toString());
                 Log.e("TAG", "input:" + input.toString());
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -119,103 +123,107 @@ public class SSLClient {
             }
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    String tempLine = input.readLine();
-                    if (!tempLine.equals("Done")) {
-                        message = message + tempLine + "\n";
-                        Log.e("TAG2", "message:" + message);
-                    } else {
-                        if (null == message || "Disconnect".contentEquals(message)) {
-                            Thread.interrupted();
-                            break;
-                        }
-                        if (message.equals(Common.connectionCode + "\n")) {
-                            Common.isConsent = true;
-                            message = "";
-                        }
-                        if (message.equals(Common.advancedEncryptionCode + "\n")) {
-                            Common.ADVANCED_ENCRYPTION = true;
-                            setSwitch();
-                            message = "";
-                        } else {
-                            if (Common.ADVANCED_ENCRYPTION && !alreadyRan) {
-                                sendMesseage(Common.advancedEncryptionCode);
-                                alreadyRan = true;
-                            }
-                        }
-                        if (Common.isConsent) {
-                            Log.e("TAG", "consent");
-                            if (Common.secretConnectionInProgress) {
-                                Log.e("TAG2", "client secretconnection");
-                                Encryptor encryptor = Encryptor.getEncryptor();
-                                if (Common.ADVANCED_ENCRYPTION) {
-                                    if (Common.SEND_KEYS) {
-                                        LevelOneRSA levelOneRSA = LevelOneRSA.getLevelOneRSA();
-                                        LevelThreeAES levelThreeAES = LevelThreeAES.getLevelThreeAES();
-                                        sendMesseage(levelOneRSA.getPublicKey());
-                                        sendMesseage(levelThreeAES.getKey());
-                                        Common.SEND_KEYS = false;
-                                    }
-                                    if (Common.RECIEVE_KEYS) {
-                                        if (!message.equals("") && Common.isAdvRSARec) {
-                                            Log.e("TAG", "Waiting on RSA");
-                                            byte[] keyBytes = Base64.decode(message.getBytes(), Base64.DEFAULT);
-                                            X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(keyBytes);
-                                            message = "";
-                                            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                                            PublicKey clientPub = keyFactory.generatePublic(pubKeySpec);
-                                            encryptor.setRsaKey(clientPub);
-                                            Log.e("TAG2", "----------RSA--------------" + "gotkey " + clientPub.toString());
-                                            Common.isAdvRSARec = false;
-                                        }
-                                        if (!message.equals("") && Common.isAdvAESRec) {
-                                            Log.e("TAG", "Waiting on AES");
-                                            byte[] keyBytes = Base64.decode(message.getBytes(), Base64.DEFAULT);
-                                            SecretKey aesKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, "AES");
-                                            Log.e("TAG2", "-------------------------" + "gotkey " + Base64.encodeToString(aesKey.getEncoded(),Base64.DEFAULT));
-                                            encryptor.setAesKey(aesKey);
-                                            Common.secretConnectionInProgress = false;
-                                            Common.RECIEVE_KEYS = false;
-                                            Common.isAdvAESRec = false;
-                                            message = "";
-
-                                        }
-                                    }
+                    if (input != null) {
+                        String tempLine = input.readLine();
+                        if (tempLine != null) {
+                            if (!tempLine.equals("Done")) {
+                                message = message + tempLine + "\n";
+                                Log.e("TAG", "messeage arrived raw: " + message);
+                            } else {
+                                if (null == message || "Disconnect\n".contentEquals(message)) {
+                                    Log.e("TAG", "interrupted");
+                                    message = "";
+                                    clientSocket.close();
+                                    chatEngine.reloadCommon();
+                                    chatEngine.clearMesseageList();
+                                    Thread.currentThread().interrupt();
+                                    break;
+                                }
+                                if (message.equals(Common.connectionCode + "\n")) {
+                                    Common.isConsent = true;
+                                    message = "";
+                                }
+                                if (message.equals(Common.advancedEncryptionCode + "\n")) {
+                                    Common.ADVANCED_ENCRYPTION = true;
+                                    message = "";
                                 } else {
-                                    Log.e("TAG", "Not advanced");
-                                    if (Common.SEND_KEYS) {
-                                        LevelOneRSA levelOneRSA = LevelOneRSA.getLevelOneRSA();
-                                        sendMesseage(levelOneRSA.getPublicKey());
-                                        Common.SEND_KEYS = false;
-                                        Log.e("TAG", "" + Common.SEND_KEYS + "<<<<Send key ");
-                                    }
-                                    Log.e("TAG", "message ");
-                                    if (Common.RECIEVE_KEYS && message != null) {
-                                        Log.e("TAG", "message " + input.toString());
-                                        if (!message.equals("")) {
-                                            Log.e("TAG", "" + message + "<ez a message");
-                                            byte[] keyBytes = Base64.decode(message.getBytes(), Base64.DEFAULT);
-                                            X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(keyBytes);
-                                            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                                            PublicKey clientPub = keyFactory.generatePublic(pubKeySpec);
-                                            encryptor.setRsaKey(clientPub);
-                                            Log.e("TAG2", "-------------------------" + "gotkey" + clientPub.toString());
-                                            Common.RECIEVE_KEYS = false;
-                                            Common.secretConnectionInProgress = false;
-                                            message = "";
-                                        }
+                                    if (Common.ADVANCED_ENCRYPTION && !alreadyRan) {
+                                        sendMesseage(Common.advancedEncryptionCode);
+                                        alreadyRan = true;
                                     }
                                 }
-                            } else {
-                                Handler mainHandler = new Handler(Looper.getMainLooper());
-                                if (message != null) {
-                                    Runnable myRunnable = new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            chatEngine.reciveMessage(message);
-                                            message = "";
+                                if (Common.isConsent) {
+                                    if (Common.secretConnectionInProgress) {
+                                        Log.e("TAG", "secretconnection");
+                                        Log.e("TAG", "recieving messeage " + message);
+                                        Encryptor encryptor = Encryptor.getEncryptor();
+                                        if (Common.ADVANCED_ENCRYPTION) {
+                                            if (Common.SEND_KEYS) {
+                                                Log.e("TAG", "secretconnection sending keys advanced");
+                                                LevelOneRSA levelOneRSA = LevelOneRSA.getLevelOneRSA();
+                                                LevelTwoAES levelTwoAES = LevelTwoAES.getLevelTwoAES();
+                                                sendMesseage(levelOneRSA.getPublicKey());
+                                                sendMesseage(levelTwoAES.getKey());
+                                                Common.SEND_KEYS = false;
+                                            }
+                                            if (Common.RECIEVE_KEYS) {
+                                                if (!message.equals("") && Common.isAdvRSARec) {
+                                                    Log.e("TAG", "secretconnection recieve rsa");
+                                                    byte[] keyBytes = Base64.decode(message.getBytes(), Base64.DEFAULT);
+                                                    X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(keyBytes);
+                                                    message = "";
+                                                    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                                                    PublicKey clientPub = keyFactory.generatePublic(pubKeySpec);
+                                                    encryptor.setRsaKey(clientPub);
+                                                    Common.isAdvRSARec = false;
+                                                }
+                                                if (!message.equals("") && Common.isAdvAESRec) {
+                                                    Log.e("TAG", "secretconnection recieve aes");
+                                                    byte[] keyBytes = Base64.decode(message.getBytes(), Base64.DEFAULT);
+                                                    SecretKey aesKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, "AES");
+                                                    encryptor.setAesKey(aesKey);
+                                                    Common.secretConnectionInProgress = false;
+                                                    Common.RECIEVE_KEYS = false;
+                                                    Common.isAdvAESRec = false;
+                                                    message = "";
+
+                                                }
+                                            }
+                                        } else {
+                                            if (Common.SEND_KEYS) {
+                                                Log.e("TAG", "secretconnection normal");
+                                                LevelOneRSA levelOneRSA = LevelOneRSA.getLevelOneRSA();
+                                                sendMesseage(levelOneRSA.getPublicKey());
+                                                Common.SEND_KEYS = false;
+                                            }
+                                            if (Common.RECIEVE_KEYS && message != null) {
+                                                if (!message.equals("")) {
+                                                    Log.e("TAG", "secretconnection normal");
+                                                    byte[] keyBytes = Base64.decode(message.getBytes(), Base64.DEFAULT);
+                                                    X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(keyBytes);
+                                                    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                                                    PublicKey clientPub = keyFactory.generatePublic(pubKeySpec);
+                                                    encryptor.setRsaKey(clientPub);
+                                                    Common.RECIEVE_KEYS = false;
+                                                    Common.secretConnectionInProgress = false;
+                                                    message = "";
+                                                }
+                                            }
                                         }
-                                    };
-                                    mainHandler.post(myRunnable);
+                                    } else {
+                                        Handler mainHandler = new Handler(Looper.getMainLooper());
+                                        if (message != null && !message.equals("")) {
+                                            Log.e("TAG", "recieving messeage");
+                                            Runnable myRunnable = new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    chatEngine.reciveMessage(message);
+                                                    message = "";
+                                                }
+                                            };
+                                            mainHandler.post(myRunnable);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -233,11 +241,15 @@ public class SSLClient {
         }
 
         public void sendMesseage(String message) {
-            new SendTask(message, this.clientSocket).execute();
+            new SendTask(message, clientSocket).execute();
         }
 
         public void disconnect() {
-            new SendTask("Disconnect", this.clientSocket).execute();
+            new SendTask("Disconnect", clientSocket).execute();
+        }
+
+        public void interupt() {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -253,6 +265,7 @@ public class SSLClient {
         @Override
         protected Void doInBackground(Void... params) {
             try {
+                Log.e("TAG2","Sending + socket: "+ clientSocket.toString());
                 if (null != clientSocket) {
                     PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())));
                     out.println(message);
@@ -268,14 +281,11 @@ public class SSLClient {
     }
 
     public void disconnect() {
-        sendMesseage("Disconnect");
         if (clientThread != null) {
             clientThread.disconnect();
+            clientThread.interupt();
             clientThread = null;
         }
     }
 
-    private void setSwitch() {
-        chatEngine.setSwitch();
-    }
 }

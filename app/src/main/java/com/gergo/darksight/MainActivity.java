@@ -2,10 +2,8 @@ package com.gergo.darksight;
 
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.support.design.widget.TabLayout;
@@ -14,7 +12,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.View;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -25,11 +23,18 @@ import com.gergo.darksight.Logic.ConnectDialog;
 import com.gergo.darksight.Networking.SSLServer;
 import com.gergo.darksight.UI.PagerAdapter;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLSocket;
+
 
 public class MainActivity extends AppCompatActivity implements ConnectDialog.NoticeDialogListener {
 
     private ChatEngine chatEngine;
     private SSLServer sslServer;
+    private SSLServerSocket serverSocket;
+    private SSLSocket serverClient;
+    private SSLSocket clientSocket;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +44,8 @@ public class MainActivity extends AppCompatActivity implements ConnectDialog.Not
         setContentView(R.layout.activity_main);
         AudioMaker audioMaker = AudioMaker.getAudioMaker();
         audioMaker.setContext(this);
-        chatEngine = ChatEngine.getChatEngine(); //needs to be before the ssl server
-        //chatEngine.setContext(this);
+        Common.USER_NAME = getResources().getString(R.string.txtInpUserNameDefault);
+        chatEngine = ChatEngine.getChatEngine();
         sslServer = new SSLServer(this, chatEngine);
         sslServer.initializeServer();
         TabLayout tabLayout = findViewById(R.id.tab_layout);
@@ -80,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements ConnectDialog.Not
     protected void onResume() {
         super.onResume();
         Common.inBackGround = false;
-        if (!Common.isConsent &&Common.isConnected) {
+        if (!Common.isConsent && Common.isConnected) {
             showDialog();
         }
     }
@@ -120,7 +125,17 @@ public class MainActivity extends AppCompatActivity implements ConnectDialog.Not
     public void sendConsent(){
         sslServer.sendMesseage(Common.connectionCode);
         if(Common.ADVANCED_ENCRYPTION){
-            //sslServer.sendMesseage(Common.advancedEncryptionCode);
+            sslServer.sendMesseage(Common.advancedEncryptionCode);
         }
+    }
+
+
+    @Override
+    protected void onPostResume() {
+        if(Common.isConnected) {
+            chatEngine.setSSLSocket();
+        }
+        super.onResume();
+        super.onPostResume();
     }
 }

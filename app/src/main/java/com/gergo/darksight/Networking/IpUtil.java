@@ -53,7 +53,7 @@ public class IpUtil {
                     }
                 }
             } catch (SocketException ex) {
-                Log.e(TAG, "Exception in Get IP Address: " + ex.toString());
+                ex.printStackTrace();
             }
             return null;
         }
@@ -64,7 +64,6 @@ public class IpUtil {
         ConnectivityManager manager = (ConnectivityManager)act.getApplicationContext().getSystemService(CONNECTIVITY_SERVICE);
         boolean isMobile = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
                 .isConnectedOrConnecting();
-
         boolean isWifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
                 .isConnectedOrConnecting();
         if (isMobile){

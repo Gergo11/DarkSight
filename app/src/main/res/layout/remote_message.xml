@@ -11,7 +11,7 @@
             android:layout_height="15dp"
             android:layout_width="15dp"
             android:scaleType="centerInside"
-            android:background="@drawable/message_avatar"
+            android:background="@drawable/logo"
             android:contentDescription="@string/app_name"/>
 
             <TextView

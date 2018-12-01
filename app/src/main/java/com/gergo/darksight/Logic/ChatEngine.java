@@ -2,9 +2,7 @@ package com.gergo.darksight.Logic;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
-import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,16 +15,17 @@ import com.gergo.darksight.Encryption.Encryptor;
 import com.gergo.darksight.Networking.SSLClient;
 import com.gergo.darksight.Networking.SSLServer;
 import com.gergo.darksight.R;
-import com.gergo.darksight.UI.RightTab;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLSocket;
+
 public class ChatEngine extends BaseAdapter {
 
-    public static String userName = Common.USER_NAME;
     private static ChatEngine chatEngine = null;
     private MessageFactory messageFactory = null;
     private Context context = null;
@@ -36,8 +35,6 @@ public class ChatEngine extends BaseAdapter {
     private AudioMaker audioMaker;
     private Encryptor encryptor;
     private Decryptor decryptor;
-    private RightTab rightTab;
-
 
     public ChatEngine() {
         messageFactory = MessageFactory.getMessageFactory();
@@ -52,21 +49,28 @@ public class ChatEngine extends BaseAdapter {
         } else {
             sslServer.disconnect();
         }
-        messageList.clear();
+        clearMesseageList();
         reloadCommon();
     }
 
-    private void reloadCommon() {
+    public void reloadCommon() {
         Common.RECIEVE_KEYS = true;
         Common.SEND_KEYS = true;
         Common.isConnected = false;
         Common.isConsent = false;
         Common.secretConnectionInProgress = false;
-        Common.isClientMode =false;
+        Common.isClientMode = false;
+        Common.isAdvAESRec = true;
+        Common.isAdvRSARec = true;
+    }
+
+    public void clearMesseageList() {
+        messageList.clear();
     }
 
     public void sendMessage(String message) {
-        JSONObject msgJson = messageFactory.createMesseage(userName, message, Common.ADVANCED_ENCRYPTION);
+
+        JSONObject msgJson = messageFactory.createMesseage(Common.USER_NAME, message, Common.ADVANCED_ENCRYPTION);
         Message msg = new Message(msgJson, true);
         messageList.add(msg);
         String toBeSent = null;
@@ -94,7 +98,7 @@ public class ChatEngine extends BaseAdapter {
         } else {
             messeageDataDecrypted = decryptor.decrypt(msgRaw);
         }
-        JSONObject msgJson = messageFactory.convertMesseage(messageFactory.createJson(messeageDataDecrypted), Common.ADVANCED_ENCRYPTION);
+        JSONObject msgJson = messageFactory.convertMesseage(messageFactory.createJson(messeageDataDecrypted));
         Message msg = new Message(msgJson, false);
         if (!Common.isConsent) {
             if (msg.getMessageString() == Common.connectionCode) {
@@ -151,14 +155,8 @@ public class ChatEngine extends BaseAdapter {
             view.setTag(messageHolder);
             messageHolder.userName.setText(message.getUsername());
             messageHolder.messageBody.setText(message.getMessageString());
-            GradientDrawable avatar = (GradientDrawable) messageHolder.avatar.getBackground();
-            avatar.setColor(Color.green(20));
         }
         return view;
-    }
-
-    public void setRightTab(RightTab rightTab) {
-        this.rightTab = rightTab;
     }
 
     public void setSslClient(SSLClient sslClient) {
@@ -169,8 +167,13 @@ public class ChatEngine extends BaseAdapter {
         this.sslServer = sslServer;
     }
 
-    public void setSwitch() {
-      //  rightTab.setSwitch();
+    public void setSSLSocket() {
+        if (Common.isClientMode) {
+
+        } else {
+            Log.e("TAG", "ssl server:" + sslServer.toString());
+            sslServer.setSocket();
+        }
     }
 }
 
